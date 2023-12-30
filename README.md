@@ -43,9 +43,9 @@ Result:
         - [Custom Address](#custom-address)
     - [Methods](#methods)
         - [chat_inference](#chat_inference)
-        - [Chat](#chat)
-        - [Back-and-Forth Conversations](#back-and-forth-conversations)
-        - [Without Chat](#without-chat)
+            - [Chat](#chat)
+            - [Back-and-Forth Conversations](#back-and-forth-conversations)
+            - [Without Chat](#without-chat)
     - [New Functionalities and APIs](#new-functionalities-and-apis)
     - [Request Options](#request-options)
         - [Timeout](#timeout)
@@ -116,7 +116,7 @@ client = Maritaca.new(
 
 #### chat_inference
 
-#### Chat
+##### Chat
 
 ```ruby
 result = client.chat_inference(
@@ -131,7 +131,7 @@ Result:
 { 'answer' => 'Oi! Como posso ajudá-lo(a) hoje?' }
 ```
 
-#### Back-and-Forth Conversations
+##### Back-and-Forth Conversations
 
 To maintain a back-and-forth conversation, you need to append the received responses and build a history for your requests:
 
@@ -152,7 +152,7 @@ Result:
 { 'answer' => 'Seu nome é Tamanduá.' }
 ```
 
-#### Without Chat
+##### Without Chat
 
 You can prompt the model without using chat mode:
 
