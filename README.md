@@ -36,27 +36,28 @@ Result:
 - [TL;DR and Quick Start](#tldr-and-quick-start)
 - [Index](#index)
 - [Setup](#setup)
-    - [Installing](#installing)
-    - [Credentials](#credentials)
+  - [Installing](#installing)
+  - [Credentials](#credentials)
 - [Usage](#usage)
-    - [Client](#client)
-        - [Custom Address](#custom-address)
-    - [Methods](#methods)
-        - [chat_inference](#chat_inference)
-            - [Chat](#chat)
-            - [Back-and-Forth Conversations](#back-and-forth-conversations)
-            - [Without Chat](#without-chat)
-    - [New Functionalities and APIs](#new-functionalities-and-apis)
-    - [Request Options](#request-options)
-        - [Timeout](#timeout)
-    - [Error Handling](#error-handling)
-        - [Rescuing](#rescuing)
-        - [For Short](#for-short)
-        - [Errors](#errors)
+  - [Client](#client)
+    - [Custom Address](#custom-address)
+  - [Methods](#methods)
+    - [chat_inference](#chat_inference)
+      - [Chat](#chat)
+      - [Back-and-Forth Conversations](#back-and-forth-conversations)
+      - [Without Chat](#without-chat)
+  - [New Functionalities and APIs](#new-functionalities-and-apis)
+  - [Request Options](#request-options)
+    - [Adapter](#adapter)
+    - [Timeout](#timeout)
+  - [Error Handling](#error-handling)
+    - [Rescuing](#rescuing)
+    - [For Short](#for-short)
+    - [Errors](#errors)
 - [Development](#development)
-    - [Purpose](#purpose)
-    - [Publish to RubyGems](#publish-to-rubygems)
-    - [Updating the README](#updating-the-readme)
+  - [Purpose](#purpose)
+  - [Publish to RubyGems](#publish-to-rubygems)
+  - [Updating the README](#updating-the-readme)
 - [Resources and References](#resources-and-references)
 - [Disclaimer](#disclaimer)
 
@@ -186,6 +187,21 @@ result = client.request(
 ```
 
 ### Request Options
+
+#### Adapter
+
+The gem uses [Faraday](https://github.com/lostisland/faraday) with the [Typhoeus](https://github.com/typhoeus/typhoeus) adapter by default.
+
+You can use a different adapter if you want:
+
+```ruby
+require 'faraday/net_http'
+
+client = Maritaca.new(
+  credentials: { api_key: ENV['MARITACA_API_KEY'] },
+  options: { connection: { adapter: :net_http } }
+)
+```
 
 #### Timeout
 

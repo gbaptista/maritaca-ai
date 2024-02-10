@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'faraday'
+require 'faraday/typhoeus'
 require 'json'
 
 require_relative '../components/errors'
@@ -11,6 +12,8 @@ module Maritaca
       DEFAULT_ADDRESS = 'https://chat.maritaca.ai'
 
       ALLOWED_REQUEST_OPTIONS = %i[timeout open_timeout read_timeout write_timeout].freeze
+
+      DEFAULT_FARADAY_ADAPTER = :typhoeus
 
       def initialize(config)
         @api_key = config.dig(:credentials, :api_key)
@@ -35,6 +38,8 @@ module Maritaca
                            else
                              {}
                            end
+
+        @faraday_adapter = config.dig(:options, :connection, :adapter) || DEFAULT_FARADAY_ADAPTER
       end
 
       def chat_inference(payload, server_sent_events: nil, &callback)
@@ -57,6 +62,7 @@ module Maritaca
         partial_json = ''
 
         response = Faraday.new(request: @request_options) do |faraday|
+          faraday.adapter @faraday_adapter
           faraday.response :raise_error
         end.send(method_to_call) do |request|
           request.url url
