@@ -192,7 +192,7 @@ end
 
 Event:
 ```ruby
-{ 'text' => ' Olá! Como' }
+{ 'text' => ' Oi! Com' }
 ```
 
 You can get all the receive events at once as an array:
@@ -208,11 +208,14 @@ result = client.chat_inference(
 
 Result:
 ```ruby
-[{ 'text' => ' Olá! Como' },
- { 'text' => ' posso ajud' },
- { 'text' => 'ar você ho' },
- { 'text' => 'je?' },
- { 'completion_tokens' => 14, 'prompt_tokens' => 67, 'total_tokens' => 81, 'model' => 'sabia-2-small' }]
+[{ 'text' => ' Oi! Com' },
+ { 'text' => 'o posso a' },
+ { 'text' => 'judar você' },
+ { 'text' => ' hoje?' },
+ { 'completion_tokens' => 15,
+   'prompt_tokens' => 74,
+   'total_tokens' => 89,
+   'model' => 'sabia-2-medium' }]
 ```
 
 You can mix both as well:
