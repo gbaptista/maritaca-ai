@@ -40,7 +40,7 @@ result = client.chat_inference(
     stream: true,
     chat_mode: true,
     messages: [{ role: 'user', content: 'Oi!' }] }
-) do |event, _raw|
+) do |event, _parsed, _raw|
   print event['text'] unless event['text'].nil?
 end
 
@@ -57,7 +57,7 @@ result = client.chat_inference(
     stream: false,
     chat_mode: true,
     messages: [{ role: 'user', content: 'Oi!' }] }
-) do |event, _raw|
+) do |event, _parsed, _raw|
   print event['answer'] unless event['answer'].nil?
 end
 
