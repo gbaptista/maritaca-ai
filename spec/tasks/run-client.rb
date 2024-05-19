@@ -50,24 +50,19 @@ puts '-' * 20
 
 puts result
 
+puts '-' * 20
+
 result = client.chat_inference(
   { model: 'sabia-2-medium',
-    chat_mode: false,
-    messages: "Minha terra tem palmeiras,\nOnde canta o Sabiá;\n",
-    stopping_tokens: ['.'] },
-  server_sent_events: false
-)
+    stream: false,
+    chat_mode: true,
+    messages: [{ role: 'user', content: 'Oi!' }] }
+) do |event, _raw|
+  print event['answer'] unless event['answer'].nil?
+end
 
-puts '*' * 20
+puts ''
+
+puts '-' * 20
 
 puts result
-
-{ 'answer' =>
-    "As aves, que aqui gorjeiam,\n" \
-    'Não gorjeiam como lá.',
-  'usage' => {
-    'completion_tokens' => 21,
-    'prompt_tokens' => 21,
-    'total_tokens' => 42
-  },
-  'model' => 'sabia-2-medium' }
