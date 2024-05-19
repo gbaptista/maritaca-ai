@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'event_stream_parser'
 require 'faraday'
 require 'faraday/typhoeus'
 require 'json'
@@ -59,8 +60,6 @@ module Maritaca
 
         method_to_call = request_method.to_s.strip.downcase.to_sym
 
-        partial_json = ''
-
         response = Faraday.new(request: @request_options) do |faraday|
           faraday.adapter @faraday_adapter
           faraday.response :raise_error
@@ -73,6 +72,10 @@ module Maritaca
           request.body = payload.to_json unless payload.nil?
 
           if server_sent_events_enabled
+            parser = EventStreamParser::Parser.new
+
+            partial_json = ''
+
             request.options.on_data = proc do |chunk, bytes, env|
               if env && env.status != 200
                 raise_error = Faraday::Response::RaiseError.new
@@ -84,13 +87,32 @@ module Maritaca
               parsed_json = safe_parse_json(partial_json)
 
               if parsed_json
-                result = { event: parsed_json, raw: { chunk:, bytes:, env: } }
+                result = {
+                  event: parsed_json,
+                  raw: { chunk:, bytes:, env: }
+                }
 
-                callback.call(result[:event], result[:raw]) unless callback.nil?
+                callback.call(result[:event], result[:parsed], result[:raw]) unless callback.nil?
 
                 results << result
 
                 partial_json = ''
+              end
+
+              parser.feed(chunk) do |type, data, id, reconnection_time|
+                parsed_data = safe_parse_json(data)
+
+                unless parsed_data.nil?
+                  result = {
+                    event: parsed_data,
+                    parsed: { type:, data:, id:, reconnection_time: },
+                    raw: { chunk:, bytes:, env: }
+                  }
+
+                  callback.call(result[:event], result[:parsed], result[:raw]) unless callback.nil?
+
+                  results << result
+                end
               end
             end
           end
