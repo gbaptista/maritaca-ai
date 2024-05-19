@@ -9,7 +9,7 @@ A Ruby gem for interacting with [MariTalk](https://chat.maritaca.ai) from [Marit
 ## TL;DR and Quick Start
 
 ```ruby
-gem 'maritaca-ai', '~> 1.1.0'
+gem 'maritaca-ai', '~> 1.2.0'
 ```
 
 ```ruby
@@ -47,11 +47,11 @@ Result:
 ### Installing
 
 ```sh
-gem install maritaca-ai -v 1.1.0
+gem install maritaca-ai -v 1.2.0
 ```
 
 ```sh
-gem 'maritaca-ai', '~> 1.1.0'
+gem 'maritaca-ai', '~> 1.2.0'
 ```
 
 ### Credentials
@@ -395,7 +395,7 @@ gem build maritaca-ai.gemspec
 
 gem signin
 
-gem push maritaca-ai-1.1.0.gem
+gem push maritaca-ai-1.2.0.gem
 ```
 
 ### Updating the README
