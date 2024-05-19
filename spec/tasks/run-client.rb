@@ -8,7 +8,7 @@ begin
   client = Maritaca.new(credentials: { api_key: nil })
 
   client.chat_inference(
-    { model: 'maritalk',
+    { model: 'sabia-2-medium',
       chat_mode: true,
       messages: [{ role: 'user', content: 'Oi!' }] }
   )
@@ -21,9 +21,53 @@ client = Maritaca.new(
 )
 
 result = client.chat_inference(
-  { model: 'maritalk',
+  { model: 'sabia-2-medium',
     chat_mode: true,
     messages: [{ role: 'user', content: 'Oi!' }] }
 )
 
 puts result
+
+puts '-' * 20
+
+client = Maritaca.new(
+  credentials: { api_key: ENV.fetch('MARITACA_API_KEY', nil) },
+  options: { server_sent_events: true }
+)
+
+result = client.chat_inference(
+  { model: 'sabia-2-medium',
+    stream: true,
+    chat_mode: true,
+    messages: [{ role: 'user', content: 'Oi!' }] }
+) do |event, _raw|
+  print event['text'] unless event['text'].nil?
+end
+
+puts ''
+
+puts '-' * 20
+
+puts result
+
+result = client.chat_inference(
+  { model: 'sabia-2-medium',
+    chat_mode: false,
+    messages: "Minha terra tem palmeiras,\nOnde canta o Sabiá;\n",
+    stopping_tokens: ['.'] },
+  server_sent_events: false
+)
+
+puts '*' * 20
+
+puts result
+
+{ 'answer' =>
+    "As aves, que aqui gorjeiam,\n" \
+    'Não gorjeiam como lá.',
+  'usage' => {
+    'completion_tokens' => 21,
+    'prompt_tokens' => 21,
+    'total_tokens' => 42
+  },
+  'model' => 'sabia-2-medium' }

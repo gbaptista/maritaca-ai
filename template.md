@@ -16,11 +16,12 @@ gem 'maritaca-ai', '~> 1.1.0'
 require 'maritaca-ai'
 
 client = Maritaca.new(
-  credentials: { api_key: ENV['MARITACA_API_KEY'] }
+  credentials: { api_key: ENV['MARITACA_API_KEY'] },
+  options: { server_sent_events: true }
 )
 
 result = client.chat_inference(
-  { model: 'maritalk',
+  { model: 'sabia-2-medium',
     chat_mode: true,
     messages: [ { role: 'user', content: 'Oi!' } ] }
 )
@@ -28,7 +29,13 @@ result = client.chat_inference(
 
 Result:
 ```ruby
-{ 'answer' => 'Oi! Como posso ajudá-lo(a) hoje?' }
+{ 'answer' => ' Oi! Como posso ajudar você hoje?',
+  'usage' => {
+    'completion_tokens' => 15,
+    'prompt_tokens' => 3,
+    'total_tokens' => 18
+  },
+  'model' => 'sabia-2-medium' }
 ```
 
 ## Index
@@ -68,7 +75,8 @@ Create a new client:
 require 'maritaca-ai'
 
 client = Maritaca.new(
-  credentials: { api_key: ENV['MARITACA_API_KEY'] }
+  credentials: { api_key: ENV['MARITACA_API_KEY'] },
+  options: { server_sent_events: true }
 )
 ```
 
@@ -91,11 +99,13 @@ client = Maritaca.new(
 
 #### chat_inference
 
-##### Chat
+##### Without Streaming Events
+
+###### Chat
 
 ```ruby
 result = client.chat_inference(
-  { model: 'maritalk',
+  { model: 'sabia-2-medium',
     chat_mode: true,
     messages: [ { role: 'user', content: 'Oi!' } ] }
 )
@@ -103,16 +113,22 @@ result = client.chat_inference(
 
 Result:
 ```ruby
-{ 'answer' => 'Oi! Como posso ajudá-lo(a) hoje?' }
+{ 'answer' => ' Oi! Como posso ajudar você hoje?',
+  'usage' => {
+    'completion_tokens' => 15,
+    'prompt_tokens' => 3,
+    'total_tokens' => 18
+  },
+  'model' => 'sabia-2-medium' }
 ```
 
-##### Back-and-Forth Conversations
+###### Back-and-Forth Conversations
 
 To maintain a back-and-forth conversation, you need to append the received responses and build a history for your requests:
 
 ```rb
 result = client.chat_inference(
-  { model: 'maritalk',
+  { model: 'sabia-2-medium',
     chat_mode: true,
     messages: [
       { role: 'user', content: 'Oi, meu nome é Tamanduá.' },
@@ -124,27 +140,123 @@ result = client.chat_inference(
 
 Result:
 ```ruby
-{ 'answer' => 'Seu nome é Tamanduá.' }
+{ 'answer' => ' Seu nome é Tamanduá. É um prazer conhecê-lo! Como posso ajudá-lo hoje?',
+  'usage' => {
+    'completion_tokens' => 35,
+    'prompt_tokens' => 39,
+    'total_tokens' => 74
+  },
+  'model' => 'sabia-2-medium' }
 ```
 
-##### Without Chat
+###### Without Chat
 
 You can prompt the model without using chat mode:
 
 ```ruby
 result = client.chat_inference(
-  { model: 'maritalk',
+  { model: 'sabia-2-medium',
     chat_mode: false,
-    messages: "Minha terra tem palmeiras,\nOnde canta o Sabiá;\n" }
+    messages: "Minha terra tem palmeiras,\nOnde canta o Sabiá;\n",
+    stopping_tokens: ['.'] }
 )
 ```
 
 Result:
 ```ruby
 { 'answer' =>
-  "As aves, que aqui gorjeiam,\n" \
-    'Não gorjeiam como lá.' }
+    "As aves, que aqui gorjeiam,\n" \
+    'Não gorjeiam como lá.',
+  'usage' => {
+    'completion_tokens' => 21,
+    'prompt_tokens' => 21,
+    'total_tokens' => 42
+  },
+  'model' => 'sabia-2-medium' }
 ```
+
+##### Receiving Stream Events
+
+Ensure that you have enabled [Server-Sent Events](#streaming-and-server-sent-events-sse) before using blocks for streaming. You also need to add `stream: true` in your payload:
+
+```ruby
+client.chat_inference(
+  { model: 'sabia-2-medium',
+    stream: true,
+    chat_mode: true,
+    messages: [ { role: 'user', content: 'Oi!' } ] }
+) do |event, parsed, raw|
+  puts event
+end
+```
+
+Event:
+```ruby
+{ 'text' => ' Olá! Como' }
+```
+
+You can get all the receive events at once as an array:
+
+```ruby
+result = client.chat_inference(
+  { model: 'sabia-2-medium',
+    stream: true,
+    chat_mode: true,
+    messages: [ { role: 'user', content: 'Oi!' } ] }
+)
+```
+
+Result:
+```ruby
+[{ 'text' => ' Olá! Como' },
+ { 'text' => ' posso ajud' },
+ { 'text' => 'ar você ho' },
+ { 'text' => 'je?' },
+ { 'completion_tokens' => 14, 'prompt_tokens' => 67, 'total_tokens' => 81, 'model' => 'sabia-2-small' }]
+```
+
+You can mix both as well:
+```ruby
+result = client.chat_inference(
+  { model: 'sabia-2-medium',
+    stream: true,
+    chat_mode: true,
+    messages: [ { role: 'user', content: 'Oi!' } ] }
+) do |event, parsed, raw|
+  puts event
+end
+```
+
+### Streaming and Server-Sent Events (SSE)
+
+[Server-Sent Events (SSE)](https://en.wikipedia.org/wiki/Server-sent_events) is a technology that allows certain endpoints to offer streaming capabilities, such as creating the impression that "the model is typing along with you," rather than delivering the entire answer all at once.
+
+You can set up the client to use Server-Sent Events (SSE) for all supported endpoints:
+```ruby
+client = Maritaca.new(
+  credentials: { api_key: ENV['MARITACA_API_KEY'] },
+  options: { server_sent_events: true }
+)
+```
+
+Or, you can decide on a request basis:
+```ruby
+client.chat_inference(
+  { model: 'sabia-2-medium',
+    stream: true,
+    chat_mode: true,
+    messages: [ { role: 'user', content: 'Oi!' } ] },
+  server_sent_events: true
+) do |event, parsed, raw|
+  puts event
+end
+```
+
+With Server-Sent Events (SSE) enabled, you can use a block to receive partial results via events. This feature is particularly useful for methods that offer streaming capabilities, such as `chat_inference`: [Receiving Stream Events](#receiving-stream-events)
+
+#### Server-Sent Events (SSE) Hang
+
+Method calls will _hang_ until the server-sent events finish, so even without providing a block, you can obtain the final results of the received events: [Receiving Stream Events](#receiving-stream-events)
 
 ### New Functionalities and APIs
 
@@ -153,7 +265,7 @@ Maritaca may launch a new endpoint that we haven't covered in the Gem yet. If th
 ```ruby
 result = client.request(
   'api/chat/inference',
-  { model: 'maritalk',
+  { model: 'sabia-2-medium',
     chat_mode: true,
     messages: [{ role: 'user', content: 'Oi!' }] },
   request_method: 'POST'
@@ -215,7 +327,7 @@ require 'maritaca-ai'
 
 begin
   client.chat_inference(
-    { model: 'maritalk',
+    { model: 'sabia-2-medium',
       chat_mode: true,
       messages: [ { role: 'user', content: 'Oi!' } ] }
   )
@@ -224,7 +336,7 @@ rescue Maritaca::Errors::MaritacaError => error
   puts error.message # 'the server responded with status 500'
 
   puts error.payload
-  # { model: 'maritalk',
+  # { model: 'sabia-2-medium',
   #   chat_mode: true,
   #   ...
   # }
@@ -241,7 +353,7 @@ require 'maritaca-ai/errors'
 
 begin
   client.chat_inference(
-    { model: 'maritalk',
+    { model: 'sabia-2-medium',
       chat_mode: true,
       messages: [ { role: 'user', content: 'Oi!' } ] }
   )

@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = ['ports/dsl']
 
+  spec.add_dependency 'event_stream_parser', '~> 1.0'
   spec.add_dependency 'faraday', '~> 2.9'
   spec.add_dependency 'faraday-typhoeus', '~> 1.1'
 
